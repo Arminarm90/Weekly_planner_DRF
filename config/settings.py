@@ -40,7 +40,8 @@ INSTALLED_APPS = [
     
     # my apps
     'rest_framework',
-    'planner'
+    'planner',
+    'account',
 ]
 
 MIDDLEWARE = [
