@@ -42,6 +42,10 @@ INSTALLED_APPS = [
     'rest_framework',
     'planner',
     'account',
+    'rest_framework_simplejwt',
+    'rest_framework_simplejwt.token_blacklist',
+
+
 ]
 
 MIDDLEWARE = [
@@ -129,3 +133,27 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # Auth
 AUTH_USER_MODEL = "account.User"
+
+# JWT
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ),
+    'DEFAULT_PERMISSION_CLASSES': (
+        'rest_framework.permissions.IsAuthenticated',
+    ),
+}
+
+from datetime import timedelta
+
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=5),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
+    'ROTATE_REFRESH_TOKENS': False,
+    'BLACKLIST_AFTER_ROTATION': True,
+    'ALGORITHM': 'HS256',
+    'SIGNING_KEY': 'your-signing-key-here',
+    'AUTH_HEADER_TYPES': ('Bearer',),
+    'USER_ID_FIELD': 'id',
+    'USER_ID_CLAIM': 'user_id',
+}

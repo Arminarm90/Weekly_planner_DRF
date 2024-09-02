@@ -1,7 +1,8 @@
 from django.db import models
-
+from account.models import User
 
 class Task(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
     name = models.CharField(max_length=250)
     description = models.TextField(null=True, blank=True)
     duration_minutes = models.PositiveIntegerField()  # Duration in minutes
