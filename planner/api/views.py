@@ -60,6 +60,8 @@ class DayAPIView(APIView):
                 "id": day.id,
                 "date": day.date,
                 "total_hours": total_hours,
+                "AnkiDroid/Ankiapp" : day.AnkiDroid_Ankiapp,
+                "word_count" : day.word_count,
                 "tasks": task_data,
             }
             data.append(day_data)
@@ -94,13 +96,24 @@ class WeekAPIView(APIView):
         weeks = Week.objects.filter(user=request.user)
         data = []
 
-        for week in weeks:
+        for week in weeks:        
+            # Get all days in this week
+            days = Day.objects.filter(
+                user=request.user,
+                date__gte=week.start_date,
+                date__lte=week.end_date
+            )
+            
             tasks = Task.objects.filter(
                 user=request.user,
                 day__date__gte=week.start_date,
                 day__date__lte=week.end_date,
             )
             task_data = TaskSerializer(tasks, many=True).data
+            
+            total_Anki_words = days.aggregate(Sum('AnkiDroid_Ankiapp'))['AnkiDroid_Ankiapp__sum'] or 0
+            total_words_count = days.aggregate(Sum('word_count'))['word_count__sum'] or 0
+
 
             total_minutes = (
                 tasks.aggregate(Sum("duration_minutes"))["duration_minutes__sum"] or 0
@@ -112,6 +125,8 @@ class WeekAPIView(APIView):
                 "start_date": week.start_date,
                 "end_date": week.end_date,
                 "total_hours": total_hours,
+                "AnkiDroid/Ankiapp" : total_Anki_words,
+                "word_count" : total_words_count,
                 "tasks": task_data,
             }
             data.append(week_data)
