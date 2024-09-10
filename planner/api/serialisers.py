@@ -5,9 +5,14 @@ from ..models import Task, Day, Week
 class TaskSerializer(serializers.ModelSerializer):
     class Meta:
         model = Task
-        fields = "__all__"
+        fields = ['id', 'name', 'description', 'duration_minutes']  # Exclude 'user'
 
-
+    def create(self, validated_data):
+        # Get the user from the request context
+        user = self.context['request'].user
+        task = Task.objects.create(user=user, **validated_data)
+        return task
+    
 class DaySerializer(serializers.ModelSerializer):
     tasks = TaskSerializer(many=True, read_only=True)
     total_hours = serializers.SerializerMethodField()
