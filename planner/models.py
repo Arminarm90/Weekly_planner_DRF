@@ -6,11 +6,16 @@ class Task(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     name = models.CharField(max_length=250)
     description = models.TextField(null=True, blank=True)
-    duration_minutes = models.PositiveIntegerField()  # Duration in minutes
+    duration_minutes = models.IntegerField(default=0,blank=True,null=True)  # Duration in minutes
     completed = models.BooleanField(default=False)
+    
+    # Studyways
+    audio_scripter_minutes = models.IntegerField(default=0,blank=True,null=True)  # Duration in minutes
+    copying_minutes = models.IntegerField(default=0,blank=True,null=True)  # Duration in minutes
+    dictation_minutes = models.IntegerField(default=0,blank=True,null=True)  # Duration in minutes
 
     def __str__(self):
-        return self.name
+        return f"Task: {self.name}"
 
 
 class Day(models.Model):
@@ -19,7 +24,7 @@ class Day(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     AnkiDroid_Ankiapp = models.IntegerField(default=0,blank=True)
     word_count = models.IntegerField(default=0,blank=True)
-
+    
     # def total_hours(self):
     #     total_minutes = sum(task.duration_minutes for task in self.tasks.all())
     #     return total_minutes / 60
