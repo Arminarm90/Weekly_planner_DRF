@@ -20,7 +20,7 @@ class TaskAPIView(APIView):
         data = request.data.copy()
 
         # Pass the request in the context when creating the serializer
-        serializer = TaskSerializer(data=data, context={'request': request})
+        serializer = TaskSerializer(data=data, context={"request": request})
         if serializer.is_valid():
             serializer.save()  # Save task with the authenticated user from context
             return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -51,8 +51,14 @@ class DayAPIView(APIView):
             tasks = Task.objects.filter(user=request.user, day=day)
             task_data = TaskSerializer(tasks, many=True).data
 
-            total_minutes = (
-                tasks.aggregate(Sum("duration_minutes"))["duration_minutes__sum"] or 0
+            total_minutes = sum(
+                [
+                    task.duration_minutes
+                    + task.audio_scripter_minutes
+                    + task.copying_minutes
+                    + task.dictation_minutes
+                    for task in tasks
+                ]
             )
             total_hours = total_minutes / 60
 
@@ -60,8 +66,8 @@ class DayAPIView(APIView):
                 "id": day.id,
                 "date": day.date,
                 "total_hours": total_hours,
-                "AnkiDroid/Ankiapp" : day.AnkiDroid_Ankiapp,
-                "word_count" : day.word_count,
+                "AnkiDroid/Ankiapp": day.AnkiDroid_Ankiapp,
+                "word_count": day.word_count,
                 "tasks": task_data,
             }
             data.append(day_data)
@@ -96,38 +102,50 @@ class WeekAPIView(APIView):
         weeks = Week.objects.filter(user=request.user)
         data = []
 
-        for week in weeks:        
+        for week in weeks:
             # Get all days in this week
             days = Day.objects.filter(
-                user=request.user,
-                date__gte=week.start_date,
-                date__lte=week.end_date
+                user=request.user, date__gte=week.start_date, date__lte=week.end_date
             )
-            
+
             tasks = Task.objects.filter(
                 user=request.user,
                 day__date__gte=week.start_date,
                 day__date__lte=week.end_date,
             )
             task_data = TaskSerializer(tasks, many=True).data
-            
-            total_Anki_words = days.aggregate(Sum('AnkiDroid_Ankiapp'))['AnkiDroid_Ankiapp__sum'] or 0
-            total_words_count = days.aggregate(Sum('word_count'))['word_count__sum'] or 0
 
-
-            total_minutes = (
-                tasks.aggregate(Sum("duration_minutes"))["duration_minutes__sum"] or 0
+            total_minutes = sum(
+                [
+                    task.duration_minutes
+                    + task.audio_scripter_minutes
+                    + task.copying_minutes
+                    + task.dictation_minutes
+                    for task in tasks
+                ]
             )
             total_hours = total_minutes / 60
+
+            total_Anki_words = (
+                days.aggregate(Sum("AnkiDroid_Ankiapp"))["AnkiDroid_Ankiapp__sum"] or 0
+            )
+            total_words_count = (
+                days.aggregate(Sum("word_count"))["word_count__sum"] or 0
+            )
+
+            # total_minutes = (
+            #     tasks.aggregate(Sum("duration_minutes"))["duration_minutes__sum"] or 0
+            # )
+            # total_hours = total_minutes / 60
 
             week_data = {
                 "id": week.id,
                 "start_date": week.start_date,
                 "end_date": week.end_date,
                 "total_hours": total_hours,
-                "AnkiDroid/Ankiapp" : total_Anki_words,
-                "word_count" : total_words_count,
-                "tasks": task_data,
+                "AnkiDroid/Ankiapp": total_Anki_words,
+                "word_count": total_words_count,
+                # "tasks": task_data,
             }
             data.append(week_data)
 
