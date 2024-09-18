@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from ..models import Task, Day, Week
+from ..models import Task
 
 
 class TaskSerializer(serializers.ModelSerializer):
@@ -39,25 +39,25 @@ class TaskSerializer(serializers.ModelSerializer):
         return representation
 
 
-class DaySerializer(serializers.ModelSerializer):
-    tasks = TaskSerializer(many=True, read_only=True)
-    # total_hours = serializers.SerializerMethodField()
+# class DaySerializer(serializers.ModelSerializer):
+#     tasks = TaskSerializer(many=True, read_only=True)
+#     # total_hours = serializers.SerializerMethodField()
 
-    class Meta:
-        model = Day
-        fields = "__all__"
+#     class Meta:
+#         model = Day
+#         fields = "__all__"
 
-    # def get_total_hours(self, obj):
-    #     return obj.total_hours()
+#     # def get_total_hours(self, obj):
+#     #     return obj.total_hours()
 
 
-class WeekSerializer(serializers.ModelSerializer):
-    days = DaySerializer(many=True, read_only=True)
-    # total_hours = serializers.SerializerMethodField()
+# class WeekSerializer(serializers.ModelSerializer):
+#     days = DaySerializer(many=True, read_only=True)
+#     # total_hours = serializers.SerializerMethodField()
 
-    class Meta:
-        model = Week
-        fields = "__all__"
+#     class Meta:
+#         model = Week
+#         fields = "__all__"
 
     # def get_total_hours(self, obj):
     #     return obj.total_hours()

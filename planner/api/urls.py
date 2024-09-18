@@ -8,8 +8,7 @@ from .views import (
     # WeekGenericAPIView,
     # WeekGenericDetailView,
     TaskAPIView,
-    DayAPIView,
-    WeekAPIView,
+
 )
 
 # router = DefaultRouter()
@@ -24,8 +23,8 @@ from .views import (
 urlpatterns = [
     path('tasks/', TaskAPIView.as_view(), name='task-list'),
     path('tasks/<int:pk>/', TaskAPIView.as_view(), name='task-detail'),
-    path('days/', DayAPIView.as_view(), name='day-list'),
-    path('days/<int:pk>/', DayAPIView.as_view(), name='day-detail'),
-    path('weeks/', WeekAPIView.as_view(), name='week-list'),
-    path('weeks/<int:pk>/', WeekAPIView.as_view(), name='week-detail'),
+    # path('days/', DayAPIView.as_view(), name='day-list'),
+    # path('days/<int:pk>/', DayAPIView.as_view(), name='day-detail'),
+    # path('weeks/', WeekAPIView.as_view(), name='week-list'),
+    # path('weeks/<int:pk>/', WeekAPIView.as_view(), name='week-detail'),
 ]

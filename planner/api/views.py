@@ -1,5 +1,5 @@
-from .serialisers import TaskSerializer, DaySerializer, WeekSerializer
-from ..models import Task, Day, Week
+from .serialisers import TaskSerializer
+from ..models import Task
 from rest_framework import viewsets, permissions, generics
 from django.db.models import Sum
 from rest_framework.response import Response
@@ -39,137 +39,135 @@ class TaskAPIView(APIView):
         task.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
+    # class DayAPIView(APIView):
+    #     permission_classes = [permissions.IsAuthenticated]
 
-class DayAPIView(APIView):
-    permission_classes = [permissions.IsAuthenticated]
+    #     def get(self, request, *args, **kwargs):
+    #         days = Day.objects.filter(user=request.user)
+    #         data = []
 
-    def get(self, request, *args, **kwargs):
-        days = Day.objects.filter(user=request.user)
-        data = []
+    #         for day in days:
+    #             tasks = Task.objects.filter(user=request.user, day=day)
+    #             task_data = TaskSerializer(tasks, many=True).data
 
-        for day in days:
-            tasks = Task.objects.filter(user=request.user, day=day)
-            task_data = TaskSerializer(tasks, many=True).data
+    #             total_minutes = sum(
+    #                 [
+    #                     task.duration_minutes
+    #                     + task.audio_scripter_minutes
+    #                     + task.copying_minutes
+    #                     + task.dictation_minutes
+    #                     for task in tasks
+    #                 ]
+    #             )
+    #             total_hours = total_minutes / 60
 
-            total_minutes = sum(
-                [
-                    task.duration_minutes
-                    + task.audio_scripter_minutes
-                    + task.copying_minutes
-                    + task.dictation_minutes
-                    for task in tasks
-                ]
-            )
-            total_hours = total_minutes / 60
+    #             day_data = {
+    #                 "id": day.id,
+    #                 "date": day.date,
+    #                 "total_hours": total_hours,
+    #                 "AnkiDroid/Ankiapp": day.AnkiDroid_Ankiapp,
+    #                 "word_count": day.word_count,
+    #                 "tasks": task_data,
+    #             }
+    #             data.append(day_data)
 
-            day_data = {
-                "id": day.id,
-                "date": day.date,
-                "total_hours": total_hours,
-                "AnkiDroid/Ankiapp": day.AnkiDroid_Ankiapp,
-                "word_count": day.word_count,
-                "tasks": task_data,
-            }
-            data.append(day_data)
+    #         return Response(data)
 
-        return Response(data)
+    #     def post(self, request, *args, **kwargs):
+    #         serializer = DaySerializer(data=request.data)
+    #         if serializer.is_valid():
+    #             serializer.save(user=request.user)
+    #             return Response(serializer.data, status=status.HTTP_201_CREATED)
+    #         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    def post(self, request, *args, **kwargs):
-        serializer = DaySerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save(user=request.user)
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    #     def put(self, request, pk, *args, **kwargs):
+    #         day = get_object_or_404(Day, pk=pk, user=request.user)
+    #         serializer = DaySerializer(day, data=request.data)
+    #         if serializer.is_valid():
+    #             serializer.save()
+    #             return Response(serializer.data)
+    #         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    def put(self, request, pk, *args, **kwargs):
-        day = get_object_or_404(Day, pk=pk, user=request.user)
-        serializer = DaySerializer(day, data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    #     def delete(self, request, pk, *args, **kwargs):
+    #         day = get_object_or_404(Day, pk=pk, user=request.user)
+    #         day.delete()
+    #         return Response(status=status.HTTP_204_NO_CONTENT)
 
-    def delete(self, request, pk, *args, **kwargs):
-        day = get_object_or_404(Day, pk=pk, user=request.user)
-        day.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
+    # class WeekAPIView(APIView):
+    # permission_classes = [permissions.IsAuthenticated]
 
+    # def get(self, request, *args, **kwargs):
+    #     weeks = Week.objects.filter(user=request.user)
+    #     data = []
 
-class WeekAPIView(APIView):
-    permission_classes = [permissions.IsAuthenticated]
+    #     for week in weeks:
+    #         # Get all days in this week
+    #         days = Day.objects.filter(
+    #             user=request.user, date__gte=week.start_date, date__lte=week.end_date
+    #         )
 
-    def get(self, request, *args, **kwargs):
-        weeks = Week.objects.filter(user=request.user)
-        data = []
+    #         tasks = Task.objects.filter(
+    #             user=request.user,
+    #             day__date__gte=week.start_date,
+    #             day__date__lte=week.end_date,
+    #         )
+    #         task_data = TaskSerializer(tasks, many=True).data
 
-        for week in weeks:
-            # Get all days in this week
-            days = Day.objects.filter(
-                user=request.user, date__gte=week.start_date, date__lte=week.end_date
-            )
+    #         total_minutes = sum(
+    #             [
+    #                 task.duration_minutes
+    #                 + task.audio_scripter_minutes
+    #                 + task.copying_minutes
+    #                 + task.dictation_minutes
+    #                 for task in tasks
+    #             ]
+    #         )
+    #         total_hours = total_minutes / 60
 
-            tasks = Task.objects.filter(
-                user=request.user,
-                day__date__gte=week.start_date,
-                day__date__lte=week.end_date,
-            )
-            task_data = TaskSerializer(tasks, many=True).data
+    #         total_Anki_words = (
+    #             days.aggregate(Sum("AnkiDroid_Ankiapp"))["AnkiDroid_Ankiapp__sum"] or 0
+    #         )
+    #         total_words_count = (
+    #             days.aggregate(Sum("word_count"))["word_count__sum"] or 0
+    #         )
 
-            total_minutes = sum(
-                [
-                    task.duration_minutes
-                    + task.audio_scripter_minutes
-                    + task.copying_minutes
-                    + task.dictation_minutes
-                    for task in tasks
-                ]
-            )
-            total_hours = total_minutes / 60
+    #         # total_minutes = (
+    #         #     tasks.aggregate(Sum("duration_minutes"))["duration_minutes__sum"] or 0
+    #         # )
+    #         # total_hours = total_minutes / 60
 
-            total_Anki_words = (
-                days.aggregate(Sum("AnkiDroid_Ankiapp"))["AnkiDroid_Ankiapp__sum"] or 0
-            )
-            total_words_count = (
-                days.aggregate(Sum("word_count"))["word_count__sum"] or 0
-            )
+    #         week_data = {
+    #             "id": week.id,
+    #             "start_date": week.start_date,
+    #             "end_date": week.end_date,
+    #             "total_hours": total_hours,
+    #             "AnkiDroid/Ankiapp": total_Anki_words,
+    #             "word_count": total_words_count,
+    #             # "tasks": task_data,
+    #         }
+    #         data.append(week_data)
 
-            # total_minutes = (
-            #     tasks.aggregate(Sum("duration_minutes"))["duration_minutes__sum"] or 0
-            # )
-            # total_hours = total_minutes / 60
+    #     return Response(data)
 
-            week_data = {
-                "id": week.id,
-                "start_date": week.start_date,
-                "end_date": week.end_date,
-                "total_hours": total_hours,
-                "AnkiDroid/Ankiapp": total_Anki_words,
-                "word_count": total_words_count,
-                # "tasks": task_data,
-            }
-            data.append(week_data)
+    # def post(self, request, *args, **kwargs):
+    #     serializer = WeekSerializer(data=request.data)
+    #     if serializer.is_valid():
+    #         serializer.save(user=request.user)
+    #         return Response(serializer.data, status=status.HTTP_201_CREATED)
+    #     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-        return Response(data)
+    # def put(self, request, pk, *args, **kwargs):
+    #     week = get_object_or_404(Week, pk=pk, user=request.user)
+    #     serializer = WeekSerializer(week, data=request.data)
+    #     if serializer.is_valid():
+    #         serializer.save()
+    #         return Response(serializer.data)
+    #     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    def post(self, request, *args, **kwargs):
-        serializer = WeekSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save(user=request.user)
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-    def put(self, request, pk, *args, **kwargs):
-        week = get_object_or_404(Week, pk=pk, user=request.user)
-        serializer = WeekSerializer(week, data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-    def delete(self, request, pk, *args, **kwargs):
-        week = get_object_or_404(Week, pk=pk, user=request.user)
-        week.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
+    # def delete(self, request, pk, *args, **kwargs):
+    #     week = get_object_or_404(Week, pk=pk, user=request.user)
+    #     week.delete()
+    #     return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 # class TasksGenericApiView(generics.ListCreateAPIView):
