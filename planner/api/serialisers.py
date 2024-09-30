@@ -11,6 +11,7 @@ class TaskSerializer(serializers.ModelSerializer):
             "name",
             "description",
             "duration_minutes",
+            "date",
             "audio_scripter_minutes",
             "copying_minutes",
             "dictation_minutes",
