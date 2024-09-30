@@ -7,6 +7,7 @@ class TaskSerializer(serializers.ModelSerializer):
         model = Task
         fields = [
             "id",
+            "user",
             "name",
             "description",
             "duration_minutes",
@@ -15,11 +16,11 @@ class TaskSerializer(serializers.ModelSerializer):
             "dictation_minutes",
         ]  # Exclude 'user'
 
-    def create(self, validated_data):
-        # Get the user from the request context
-        user = self.context["request"].user
-        task = Task.objects.create(user=user, **validated_data)
-        return task
+    # def create(self, validated_data):
+    #     # Get the user from the request context
+    #     user = self.user.studentprofile
+    #     task = Task.objects.create(user=user, **validated_data)
+    #     return task
 
     def to_representation(self, instance):
         # Get the original representation (default data for all fields)

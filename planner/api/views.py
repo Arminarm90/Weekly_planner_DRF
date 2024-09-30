@@ -12,22 +12,22 @@ class TaskAPIView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def get(self, request, *args, **kwargs):
-        tasks = Task.objects.filter(user=request.user)
+        tasks = Task.objects.filter(user=request.user.studentprofile)
         serializer = TaskSerializer(tasks, many=True)
         return Response(serializer.data)
 
     def post(self, request, *args, **kwargs):
+        student = request.user.studentprofile
         data = request.data.copy()
-
-        # Pass the request in the context when creating the serializer
-        serializer = TaskSerializer(data=data, context={"request": request})
+        data['user'] = student.id  # Assign the student automatically
+        serializer = TaskSerializer(data=data)
         if serializer.is_valid():
             serializer.save()  # Save task with the authenticated user from context
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def put(self, request, pk, *args, **kwargs):
-        task = get_object_or_404(Task, pk=pk, user=request.user)
+        task = get_object_or_404(Task, pk=pk, user=request.user.studentprofile)
         serializer = TaskSerializer(task, data=request.data)
         if serializer.is_valid():
             serializer.save()
@@ -35,7 +35,7 @@ class TaskAPIView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def delete(self, request, pk, *args, **kwargs):
-        task = get_object_or_404(Task, pk=pk, user=request.user)
+        task = get_object_or_404(Task, pk=pk, user=request.user.studentprofile)
         task.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
